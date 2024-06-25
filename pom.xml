@@ -13,6 +13,7 @@
         <module>example-producer</module>
         <module>example-consumer</module>
         <module>shaoxia-rpc-easy</module>
+        <module>shaoxia-rpc-core</module>
     </modules>
 
     <properties>
