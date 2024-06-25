@@ -2,6 +2,7 @@ package com.shaoxia.consumer;
 
 import com.shaoxia.common.model.User;
 import com.shaoxia.common.service.UserService;
+import com.shaoxia.rpceasy.proxy.ServiceProxyFactory;
 
 import java.util.Objects;
 
@@ -13,11 +14,13 @@ import java.util.Objects;
  */
 public class ConsumerExample {
 	public static void main(String[] args) {
-		UserService userService = null;
+		// UserService userService = null;
+		UserService userService = ServiceProxyFactory.getProxy(UserService.class);
 		User user = new User();
 		user.setName("shaoxia");
 
 		User newUser = userService.getUser(user);
+		System.out.println(newUser);
 
 		if (Objects.isNull(newUser)){
 			System.out.println("new user == null");

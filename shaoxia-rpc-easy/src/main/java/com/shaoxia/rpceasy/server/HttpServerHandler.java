@@ -41,6 +41,8 @@ public class HttpServerHandler implements Handler<HttpServerRequest> {
 				e.printStackTrace();
 			}
 
+			System.out.println(rpcRequest);
+
 			// 构造响应对象
 			RpcResponse rpcResponse = new RpcResponse();
 			// 如果请求对象为null，直接返回
