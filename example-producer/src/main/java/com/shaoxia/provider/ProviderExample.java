@@ -1,4 +1,4 @@
-package com.shaoxia;
+package com.shaoxia.provider;
 
 import com.shaoxia.common.service.UserService;
 import com.shaoxia.provider.service.impl.UserServiceImpl;

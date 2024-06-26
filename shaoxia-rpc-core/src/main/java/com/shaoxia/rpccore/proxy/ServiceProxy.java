@@ -6,6 +6,7 @@ import com.shaoxia.rpccore.model.RpcRequest;
 import com.shaoxia.rpccore.model.RpcResponse;
 import com.shaoxia.rpccore.serializer.JdkSerializer;
 import com.shaoxia.rpccore.serializer.Serializer;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -16,6 +17,7 @@ import java.lang.reflect.Method;
  * @description: JDK服务代理
  * @date 2024-06-25 12:18
  */
+@Slf4j
 public class ServiceProxy implements InvocationHandler {
 
 	/**
@@ -28,8 +30,8 @@ public class ServiceProxy implements InvocationHandler {
 	 */
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		System.out.println("invoke method"+method.getName());
-		System.out.println("invoke object"+method.getDeclaringClass().getName());
+		log.info("invoke method is {}",method.getName());
+		log.info("invoke object is {}",method.getDeclaringClass().getName());
 
 		// 指定序列化器
 		Serializer serializer = new JdkSerializer();

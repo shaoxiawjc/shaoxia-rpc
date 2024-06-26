@@ -29,7 +29,7 @@ public class ConsumerExample {
 		if (Objects.isNull(newUser)){
 			System.out.println("new user == null");
 		}else {
-			System.out.println("newUser name: "+newUser.getName());
+			System.out.println("newUser: "+newUser);
 		}
 	}
 }

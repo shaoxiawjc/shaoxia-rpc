@@ -12,7 +12,6 @@ import com.shaoxia.common.service.UserService;
 public class UserServiceImpl implements UserService {
 	@Override
 	public User getUser(User user) {
-		System.out.println("User name: "+user.getName());
 		return user;
 	}
 }
