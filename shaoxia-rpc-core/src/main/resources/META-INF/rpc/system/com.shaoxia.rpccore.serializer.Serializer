@@ -1,0 +1,4 @@
+jdk=com.shaoxia.rpccore.serializer.JdkSerializer
+json=com.shaoxia.rpccore.serializer.JSONSerializer
+hessian=com.shaoxia.rpccore.serializer.HessianSerializer
+kryo=com.shaoxia.rpccore.serializer.KryoSerializer

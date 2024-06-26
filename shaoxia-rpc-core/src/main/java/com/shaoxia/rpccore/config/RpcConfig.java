@@ -1,5 +1,6 @@
 package com.shaoxia.rpccore.config;
 
+import com.shaoxia.rpccore.serializer.SerializerKeys;
 import lombok.Data;
 
 /**
@@ -34,4 +35,9 @@ public class RpcConfig {
 	 * 是否开启mock
 	 */
 	private boolean mock = false;
+
+	/**
+	 * 序列化器
+	 */
+	private String serializer = SerializerKeys.JDK;
 }

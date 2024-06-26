@@ -2,10 +2,12 @@ package com.shaoxia.rpccore.proxy;
 
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
+import com.shaoxia.rpccore.RpcApplication;
 import com.shaoxia.rpccore.model.RpcRequest;
 import com.shaoxia.rpccore.model.RpcResponse;
 import com.shaoxia.rpccore.serializer.JdkSerializer;
 import com.shaoxia.rpccore.serializer.Serializer;
+import com.shaoxia.rpccore.serializer.SerializerFactory;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
@@ -34,7 +36,7 @@ public class ServiceProxy implements InvocationHandler {
 		log.info("invoke object is {}",method.getDeclaringClass().getName());
 
 		// 指定序列化器
-		Serializer serializer = new JdkSerializer();
+		final Serializer serializer = SerializerFactory.getInstance(RpcApplication.getRpcConfig().getSerializer());
 
 		// 构造请求
 		RpcRequest rpcRequest = RpcRequest.builder()
