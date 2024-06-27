@@ -1,0 +1,2 @@
+hessian=com.shaoxia.rpccore.serializer.HessianSerializer
+kryo=com.shaoxia.rpccore.serializer.KryoSerializer

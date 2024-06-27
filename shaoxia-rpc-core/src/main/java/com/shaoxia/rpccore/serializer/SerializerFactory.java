@@ -1,5 +1,8 @@
 package com.shaoxia.rpccore.serializer;
 
+import com.shaoxia.rpccore.spi.SpiLoader;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,26 +12,23 @@ import java.util.Map;
  * @description: 序列化器工厂
  * @date 2024-06-26 15:19
  */
+@Slf4j
 public class SerializerFactory {
-	/**
-	 * 序列化器映射
-	 */
-	private static final Map<String ,Serializer> KEY_SERIALIZER_MAP = new HashMap<String,Serializer>(){{
-		put(SerializerKeys.JDK,new JdkSerializer());
-		put(SerializerKeys.JSON,new JSONSerializer());
-		put(SerializerKeys.KRYO,new KryoSerializer());
-		put(SerializerKeys.HESSIAN,new HessianSerializer());
-	}};
+
+	static {
+		SpiLoader.load(Serializer.class);
+	}
+
 
 	/**
 	 * 默认序列化器
 	 */
-	private static final Serializer DEFAULT_SERIALIZER = KEY_SERIALIZER_MAP.get(SerializerKeys.JDK);
+	private static final Serializer DEFAULT_SERIALIZER = new JdkSerializer();
 
 	/**
 	 * 获取实例
 	 */
 	public static Serializer getInstance(String key){
-		return KEY_SERIALIZER_MAP.getOrDefault(key,DEFAULT_SERIALIZER);
+		return SpiLoader.getInstance(Serializer.class,key);
 	}
 }
