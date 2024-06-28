@@ -1,7 +1,10 @@
 package com.shaoxia.rpccore;
 
+import com.shaoxia.rpccore.config.RegistryConfig;
 import com.shaoxia.rpccore.config.RpcConfig;
 import com.shaoxia.rpccore.constant.RpcConstant;
+import com.shaoxia.rpccore.registry.Registry;
+import com.shaoxia.rpccore.registry.RegistryFactory;
 import com.shaoxia.rpccore.utils.ConfigUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,6 +25,11 @@ public class RpcApplication {
 	public static void init(RpcConfig newRpcConfig){
 		rpcConfig = newRpcConfig;
 		log.info("rpc inti,config = {}",newRpcConfig.toString());
+		// 注册中心初始化
+		RegistryConfig registryConfig = rpcConfig.getRegistryConfig();
+		Registry registry = RegistryFactory.getInstance(registryConfig.getRegistry());
+		registry.init(registryConfig);
+		log.info("registry init,config = {}",registryConfig.toString());
 	}
 
 
