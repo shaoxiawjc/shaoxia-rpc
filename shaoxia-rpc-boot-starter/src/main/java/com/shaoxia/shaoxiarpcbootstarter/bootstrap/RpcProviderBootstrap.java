@@ -1,7 +1,6 @@
 package com.shaoxia.shaoxiarpcbootstarter.bootstrap;
 
 import com.shaoxia.rpccore.RpcApplication;
-import com.shaoxia.rpccore.config.RegistryConfig;
 import com.shaoxia.rpccore.config.RpcConfig;
 import com.shaoxia.rpccore.model.ServiceMetaInfo;
 import com.shaoxia.rpccore.registry.LocalRegistry;
