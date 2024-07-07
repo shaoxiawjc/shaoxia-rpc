@@ -8,6 +8,8 @@ import com.shaoxia.rpccore.RpcApplication;
 import com.shaoxia.rpccore.config.RegistryConfig;
 import com.shaoxia.rpccore.config.RpcConfig;
 import com.shaoxia.rpccore.constant.RpcConstant;
+import com.shaoxia.rpccore.loadbalancer.LoadBalancer;
+import com.shaoxia.rpccore.loadbalancer.LoadBalancerFactory;
 import com.shaoxia.rpccore.model.RpcRequest;
 import com.shaoxia.rpccore.model.RpcResponse;
 import com.shaoxia.rpccore.model.ServiceMetaInfo;
@@ -28,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -83,7 +86,12 @@ public class ServiceProxy implements InvocationHandler {
 				throw new RuntimeException("暂无服务地址");
 			}
 
-			ServiceMetaInfo selected = serviceMetaInfos.get(0);
+			LoadBalancer loadBalancer = LoadBalancerFactory.getInstance(rpcConfig.getLoadBalancer());
+			// 将调用的方法名作为负载均衡参数
+			String methodName = rpcRequest.getMethodName();
+			HashMap<String, Object> requestParams = new HashMap<>();
+			requestParams.put("methodName",methodName);
+			ServiceMetaInfo selected = loadBalancer.select(requestParams, serviceMetaInfos);
 			// 发送TCP请求
 			RpcResponse rpcResponse = VertxTcpClient.doRequest(rpcRequest, selected);
 			return rpcResponse.getData();

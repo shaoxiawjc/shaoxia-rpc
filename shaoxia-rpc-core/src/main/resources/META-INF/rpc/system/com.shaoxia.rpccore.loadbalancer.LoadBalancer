@@ -1,0 +1,3 @@
+roundRobin=com.shaoxia.rpccore.loadbalancer.RoundRobinLoadBalancer
+random=com.shaoxia.rpccore.loadbalancer.RandomLoadBalancer
+consistHash=com.shaoxia.rpccore.loadbalancer.ConsistHashLoadBalancer
