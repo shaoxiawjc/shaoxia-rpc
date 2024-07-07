@@ -41,7 +41,13 @@ public interface Registry {
 	void destroy();
 
 	/**
-	 * 心跳机制
+	 * 心跳机制（提供者）
 	 */
 	void heartBeat();
+
+	/**
+	 * 监听一个服务（消费者端）
+	 * @param watchNodeKey
+	 */
+	void watch(String watchNodeKey);
 }

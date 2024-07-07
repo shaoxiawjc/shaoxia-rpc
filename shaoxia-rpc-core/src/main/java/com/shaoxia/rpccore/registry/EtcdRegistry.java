@@ -1,6 +1,7 @@
 package com.shaoxia.rpccore.registry;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.ConcurrentHashSet;
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.task.Task;
 import cn.hutool.json.JSONUtil;
@@ -9,6 +10,7 @@ import com.shaoxia.rpccore.model.ServiceMetaInfo;
 import io.etcd.jetcd.*;
 import io.etcd.jetcd.options.GetOption;
 import io.etcd.jetcd.options.PutOption;
+import io.etcd.jetcd.watch.WatchEvent;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.charset.StandardCharsets;
@@ -16,7 +18,6 @@ import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 /**
@@ -34,6 +35,13 @@ public class EtcdRegistry implements Registry{
 	private final Set<String> localRegisterNodeKeySet = new HashSet<>();
 
 	private static final String ETCD_ROOT_PATH = "/rpc/";
+
+	private final RegistryServiceCache registryServiceCache = new RegistryServiceCache();
+
+	/**
+	 * 正在监听的节点集合
+	 */
+	private final Set<String> watchingNodeSet = new ConcurrentHashSet<>();
 
 	@Override
 	public void init(RegistryConfig registryConfig) {
@@ -70,6 +78,11 @@ public class EtcdRegistry implements Registry{
 
 	@Override
 	public List<ServiceMetaInfo> serviceDiscovery(String serviceKey) {
+		List<ServiceMetaInfo> serviceMetaInfosInCache = registryServiceCache.readCache();
+		if (serviceMetaInfosInCache != null){
+			return serviceMetaInfosInCache;
+		}
+
 		// 前缀搜索
 		String searchPrefix = ETCD_ROOT_PATH + serviceKey + "/";
 
@@ -80,10 +93,16 @@ public class EtcdRegistry implements Registry{
 							getOption
 					).get()
 					.getKvs();
-			return kvs.stream().map(keyValue -> {
+			List<ServiceMetaInfo> serviceMetaInfos = kvs.stream().map(keyValue -> {
+				// 监听服务
+				String key = keyValue.getKey().toString(StandardCharsets.UTF_8);
+				watch(key);
 				String value = keyValue.getValue().toString(StandardCharsets.UTF_8);
 				return JSONUtil.toBean(value, ServiceMetaInfo.class);
 			}).collect(Collectors.toList());
+			// 写入服务缓存
+			registryServiceCache.writeCache(serviceMetaInfos);
+			return serviceMetaInfos;
 		}catch (Exception e){
 			throw new RuntimeException("获取服务列表失败",e);
 		}
@@ -92,6 +111,14 @@ public class EtcdRegistry implements Registry{
 	@Override
 	public void destroy() {
 		System.out.println("当前节点下线");
+		// 下线所有节点
+		for (String registerKey : localRegisterNodeKeySet) {
+			try {
+				kvClient.delete(ByteSequence.from(registerKey,StandardCharsets.UTF_8));
+			}catch (Exception e){
+				throw new RuntimeException(registerKey + "节点下线失败");
+			}
+		}
 		if (kvClient != null) {
 			kvClient.close();
 		}
@@ -105,7 +132,7 @@ public class EtcdRegistry implements Registry{
 	public void heartBeat() {
 		log.info("heartBeat once--");
 		CronUtil.schedule("*/10 * * * * *", (Task) () -> {
-			System.out.println("");
+			log.info("--- heart beat ---");
 			for (String registryKey : localRegisterNodeKeySet) {
 				try {
 					List<KeyValue> kvs = kvClient.get(ByteSequence.from(registryKey, StandardCharsets.UTF_8))
@@ -126,6 +153,33 @@ public class EtcdRegistry implements Registry{
 
 		CronUtil.setMatchSecond(true);
 		CronUtil.start();
+
+	}
+
+	/**
+	 * 监听（消费端）
+	 * @param watchNodeKey 监听的服务Key
+	 */
+	@Override
+	public void watch(String watchNodeKey) {
+		Watch watchClient = client.getWatchClient();
+		// 添加新的监听
+		boolean newWatch = watchingNodeSet.add(watchNodeKey);
+		if (newWatch){
+			watchClient.watch(ByteSequence.from(watchNodeKey,StandardCharsets.UTF_8),watchResponse -> {
+				for (WatchEvent event : watchResponse.getEvents()) {
+					switch (event.getEventType()){
+						// key 删除时触发
+						case DELETE:
+							registryServiceCache.clear();
+							break;
+						case PUT:
+						default:
+							break;
+					}
+				}
+			});
+		}
 
 	}
 }

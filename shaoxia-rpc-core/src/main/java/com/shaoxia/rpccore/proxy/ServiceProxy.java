@@ -1,6 +1,7 @@
 package com.shaoxia.rpccore.proxy;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import com.shaoxia.rpccore.RpcApplication;
@@ -10,18 +11,25 @@ import com.shaoxia.rpccore.constant.RpcConstant;
 import com.shaoxia.rpccore.model.RpcRequest;
 import com.shaoxia.rpccore.model.RpcResponse;
 import com.shaoxia.rpccore.model.ServiceMetaInfo;
+import com.shaoxia.rpccore.protocol.*;
 import com.shaoxia.rpccore.registry.Registry;
 import com.shaoxia.rpccore.registry.RegistryFactory;
 import com.shaoxia.rpccore.registry.RegistryKeys;
 import com.shaoxia.rpccore.serializer.JdkSerializer;
 import com.shaoxia.rpccore.serializer.Serializer;
 import com.shaoxia.rpccore.serializer.SerializerFactory;
-import com.sun.jmx.mbeanserver.Repository;
+import com.shaoxia.rpccore.server.tcp.VertxTcpClient;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.net.NetClient;
+import io.vertx.core.net.NetSocket;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author wjc28
@@ -64,8 +72,8 @@ public class ServiceProxy implements InvocationHandler {
 			// 序列化
 			byte[] bodyBytes = serializer.serialize(rpcRequest);
 			// 发送请求
-			// todo 使用注册中心服务发现来修改地址
 			RegistryConfig registryConfig = rpcConfig.getRegistryConfig();
+			// 获取注册中心 默认ETCD
 			Registry registry = RegistryFactory.getInstance(registryConfig.getRegistry());
 			ServiceMetaInfo serviceMetaInfo = new ServiceMetaInfo();
 			serviceMetaInfo.setServiceName(serviceName);
@@ -74,15 +82,12 @@ public class ServiceProxy implements InvocationHandler {
 			if(CollUtil.isEmpty(serviceMetaInfos)){
 				throw new RuntimeException("暂无服务地址");
 			}
+
 			ServiceMetaInfo selected = serviceMetaInfos.get(0);
-			try (HttpResponse httpResponse= HttpRequest.post(selected.getServiceAddress())
-					.body(bodyBytes)
-					.execute()){
-				byte[] result = httpResponse.bodyBytes();
-				// 反序列化
-				RpcResponse rpcResponse = serializer.deserialize(result, RpcResponse.class);
-				return  rpcResponse.getData();
-			}
+			// 发送TCP请求
+			RpcResponse rpcResponse = VertxTcpClient.doRequest(rpcRequest, selected);
+			return rpcResponse.getData();
+
 		}catch (Exception e){
 			e.printStackTrace();
 		}

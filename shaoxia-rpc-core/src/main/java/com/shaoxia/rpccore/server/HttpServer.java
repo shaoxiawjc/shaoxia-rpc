@@ -7,6 +7,6 @@ package com.shaoxia.rpccore.server;
  * @date 2024-06-23 21:05
  */
 public interface HttpServer {
-	void doPort(int port);
+	void doStart(int port);
 
 }

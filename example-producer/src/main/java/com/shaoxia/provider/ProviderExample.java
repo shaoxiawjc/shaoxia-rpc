@@ -11,6 +11,7 @@ import com.shaoxia.rpccore.registry.Registry;
 import com.shaoxia.rpccore.registry.RegistryFactory;
 import com.shaoxia.rpccore.server.HttpServer;
 import com.shaoxia.rpccore.server.VertxHttpServer;
+import com.shaoxia.rpccore.server.tcp.VertxTcpServer;
 
 /**
  * @author wjc28
@@ -41,8 +42,7 @@ public class ProviderExample {
 			throw new RuntimeException(e);
 		}
 
-
-		HttpServer httpServer = new VertxHttpServer();
-		httpServer.doPort(RpcApplication.getRpcConfig().getServerPort());
+		HttpServer httpServer = new VertxTcpServer();
+		httpServer.doStart(RpcApplication.getRpcConfig().getServerPort());
 	}
 }
