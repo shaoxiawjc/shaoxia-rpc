@@ -8,6 +8,10 @@ import com.shaoxia.rpccore.RpcApplication;
 import com.shaoxia.rpccore.config.RegistryConfig;
 import com.shaoxia.rpccore.config.RpcConfig;
 import com.shaoxia.rpccore.constant.RpcConstant;
+import com.shaoxia.rpccore.fault.retry.RetryStrategy;
+import com.shaoxia.rpccore.fault.retry.RetryStrategyFactory;
+import com.shaoxia.rpccore.fault.tolerant.TolerantStrategy;
+import com.shaoxia.rpccore.fault.tolerant.TolerantStrategyFactory;
 import com.shaoxia.rpccore.loadbalancer.LoadBalancer;
 import com.shaoxia.rpccore.loadbalancer.LoadBalancerFactory;
 import com.shaoxia.rpccore.model.RpcRequest;
@@ -56,13 +60,13 @@ public class ServiceProxy implements InvocationHandler {
 		log.info("invoke method is {}",method.getName());
 		log.info("invoke object is {}",method.getDeclaringClass().getName());
 
-		// 指定序列化器
+
 		RpcConfig rpcConfig = RpcApplication.getRpcConfig();
-		final Serializer serializer = SerializerFactory.getInstance(rpcConfig.getSerializer());
 
 		// 构造请求
 		String serviceName = method.getDeclaringClass().getName();
 		RpcRequest rpcRequest = RpcRequest.builder()
+				.serviceVersion(RpcConstant.DEFAULT_SERVICE_VERSION)
 				.serviceName(serviceName)
 				.methodName(method.getName())
 				.parameterTypes(method.getParameterTypes())
@@ -71,34 +75,39 @@ public class ServiceProxy implements InvocationHandler {
 
 		System.out.println("构造的请求为"+rpcRequest.toString());
 
-		try {
-			// 序列化
-			byte[] bodyBytes = serializer.serialize(rpcRequest);
-			// 发送请求
-			RegistryConfig registryConfig = rpcConfig.getRegistryConfig();
-			// 获取注册中心 默认ETCD
-			Registry registry = RegistryFactory.getInstance(registryConfig.getRegistry());
-			ServiceMetaInfo serviceMetaInfo = new ServiceMetaInfo();
-			serviceMetaInfo.setServiceName(serviceName);
-			serviceMetaInfo.setServiceVersion(RpcConstant.DEFAULT_SERVICE_VERSION);
-			List<ServiceMetaInfo> serviceMetaInfos = registry.serviceDiscovery(serviceMetaInfo.getServiceKey());
-			if(CollUtil.isEmpty(serviceMetaInfos)){
-				throw new RuntimeException("暂无服务地址");
-			}
 
-			LoadBalancer loadBalancer = LoadBalancerFactory.getInstance(rpcConfig.getLoadBalancer());
-			// 将调用的方法名作为负载均衡参数
-			String methodName = rpcRequest.getMethodName();
-			HashMap<String, Object> requestParams = new HashMap<>();
-			requestParams.put("methodName",methodName);
-			ServiceMetaInfo selected = loadBalancer.select(requestParams, serviceMetaInfos);
-			// 发送TCP请求
-			RpcResponse rpcResponse = VertxTcpClient.doRequest(rpcRequest, selected);
-			return rpcResponse.getData();
-
-		}catch (Exception e){
-			e.printStackTrace();
+		// 发送请求
+		RegistryConfig registryConfig = rpcConfig.getRegistryConfig();
+		// 获取注册中心 默认ETCD
+		Registry registry = RegistryFactory.getInstance(registryConfig.getRegistry());
+		ServiceMetaInfo serviceMetaInfo = new ServiceMetaInfo();
+		serviceMetaInfo.setServiceName(serviceName);
+		serviceMetaInfo.setServiceVersion(RpcConstant.DEFAULT_SERVICE_VERSION);
+		List<ServiceMetaInfo> serviceMetaInfos = registry.serviceDiscovery(serviceMetaInfo.getServiceKey());
+		System.out.println("服务列表为"+serviceMetaInfos);
+		if(CollUtil.isEmpty(serviceMetaInfos)){
+			throw new RuntimeException("暂无服务地址");
 		}
+		System.out.println("开始负载均衡");
+		LoadBalancer loadBalancer = LoadBalancerFactory.getInstance(rpcConfig.getLoadBalancer());
+		// 将调用的方法名作为负载均衡参数
+		String methodName = rpcRequest.getMethodName();
+		HashMap<String, Object> requestParams = new HashMap<>();
+		requestParams.put("methodName",methodName);
+		ServiceMetaInfo selected = loadBalancer.select(requestParams, serviceMetaInfos);
+		System.out.println("选择了"+selected);
+		// 发送TCP请求
+		try {
+			RetryStrategy retryStrategy = RetryStrategyFactory.getInstance(rpcConfig.getRetryStrategy());
+			RpcResponse rpcResponse = retryStrategy.doRetry(()->
+				 VertxTcpClient.doRequest(rpcRequest, selected)
+			);
+			return rpcResponse.getData();
+		}catch (Exception e) {
+			TolerantStrategy tolerantStrategy = TolerantStrategyFactory.getInstance(RpcApplication.getRpcConfig().getTolerantStrategy());
+			tolerantStrategy.doTolerant(null,e);
+		}
+
 		return null;
 	}
 }

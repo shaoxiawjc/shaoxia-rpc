@@ -130,9 +130,7 @@ public class EtcdRegistry implements Registry{
 
 	@Override
 	public void heartBeat() {
-		log.info("heartBeat once--");
 		CronUtil.schedule("*/10 * * * * *", (Task) () -> {
-			log.info("--- heart beat ---");
 			for (String registryKey : localRegisterNodeKeySet) {
 				try {
 					List<KeyValue> kvs = kvClient.get(ByteSequence.from(registryKey, StandardCharsets.UTF_8))

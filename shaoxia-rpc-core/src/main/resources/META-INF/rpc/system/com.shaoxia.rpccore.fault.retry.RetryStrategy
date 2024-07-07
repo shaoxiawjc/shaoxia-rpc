@@ -1,0 +1,2 @@
+no=com.shaoxia.rpccore.fault.retry.NoRetryStrategy
+fixedInterval=com.shaoxia.rpccore.fault.retry.FixedIntervalRetryStrategy

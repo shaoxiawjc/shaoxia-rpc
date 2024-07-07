@@ -1,0 +1,2 @@
+failFast=com.shaoxia.rpccore.fault.tolerant.FailFastTolerantStrategy
+failSafe=com.shaoxia.rpccore.fault.tolerant.FailSafeTolerantStrategy

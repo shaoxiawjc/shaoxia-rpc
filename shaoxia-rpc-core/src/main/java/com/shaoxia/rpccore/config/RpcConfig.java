@@ -1,5 +1,7 @@
 package com.shaoxia.rpccore.config;
 
+import com.shaoxia.rpccore.fault.retry.RetryStrategyKeys;
+import com.shaoxia.rpccore.fault.tolerant.TolerantStrategyKeys;
 import com.shaoxia.rpccore.loadbalancer.LoadBalancer;
 import com.shaoxia.rpccore.loadbalancer.LoadBalancerKeys;
 import com.shaoxia.rpccore.serializer.SerializerKeys;
@@ -52,4 +54,14 @@ public class RpcConfig {
 	 * 负载均衡策略
 	 */
 	private String loadBalancer = LoadBalancerKeys.ROUND_ROBIN;
+
+	/**
+	 * 重试策略
+	 */
+	private String retryStrategy = RetryStrategyKeys.NO;
+
+	/**
+	 * 容错机制
+	 */
+	private String tolerantStrategy = TolerantStrategyKeys.FAIL_SAFE;
 }

@@ -44,22 +44,20 @@ public class ProtocolMessageDecoder {
 			throw new RuntimeException("序列化的消息类型不存在");
 		}
 		switch (messageTypeEnum){
-			case REQUEST -> {
+			case REQUEST : {
 				RpcRequest request = serializer.deserialize(bodyBytes, RpcRequest.class);
 				return new ProtocolMessage<>(header,request);
 			}
-			case RESPONSE -> {
+			case RESPONSE :{
 				RpcResponse response = serializer.deserialize(bodyBytes, RpcResponse.class);
 				return new ProtocolMessage<>(header,response);
 			}
-			case HEART_BEAT, OTHER -> {
-				return null;
-			}
-			default -> {
+			case HEART_BEAT :break;
+			case OTHER:
+			default : {
 				throw new RuntimeException("暂不支持该消息类型");
 			}
 		}
-
-
+		return null;
 	}
 }
