@@ -34,7 +34,7 @@ public class TcpBufferHandlerWrapper implements Handler<Buffer> {
 	 * @return
 	 */
 	private RecordParser initRecordParser(Handler<Buffer> bufferHandler) {
-		// 构造 parser
+		// 构造 parser，初始化消息头长度
 		RecordParser parser = RecordParser.newFixed(ProtocolConstant.MESSAGE_HEADER_LENGTH);
 
 		parser.setOutput(new Handler<Buffer>() {
@@ -65,7 +65,6 @@ public class TcpBufferHandlerWrapper implements Handler<Buffer> {
 				}
 			}
 		});
-
 		return parser;
 	}
 }

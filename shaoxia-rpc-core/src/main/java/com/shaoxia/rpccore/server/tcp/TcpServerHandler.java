@@ -29,14 +29,14 @@ public class TcpServerHandler implements Handler<NetSocket> {
 			ProtocolMessage<RpcRequest> protocolMessage;
 			try {
 				protocolMessage = (ProtocolMessage<RpcRequest>) ProtocolMessageDecoder.decode(buffer);
-				log.info("protocolMessage"+protocolMessage);
+				log.info("protocolMessage{}", protocolMessage);
 			} catch (IOException e) {
 				throw new RuntimeException("协议消息解码错误");
 			}
 			RpcRequest rpcRequest = protocolMessage.getBody();
 			ProtocolMessage.Header header = protocolMessage.getHeader();
 
-			log.info("rpcRequest"+rpcRequest);
+			log.info("rpcRequest{}", rpcRequest);
 			// 处理请求
 			// 构造响应结果对象
 			RpcResponse rpcResponse = new RpcResponse();
@@ -59,7 +59,7 @@ public class TcpServerHandler implements Handler<NetSocket> {
 			header.setType((byte) ProtocolMessageTypeEnum.RESPONSE.getKey());
 			header.setStatus((byte) ProtocolMessageStatusEnum.OK.getValue());
 			ProtocolMessage<RpcResponse> responseProtocolMessage = new ProtocolMessage<>(header, rpcResponse);
-			log.info("responseProtocolMessage"+responseProtocolMessage);
+			log.info("responseProtocolMessage{}", responseProtocolMessage);
 			try {
 				Buffer encode = ProtocolMessageEncoder.encode(responseProtocolMessage);
 				socket.write(encode);

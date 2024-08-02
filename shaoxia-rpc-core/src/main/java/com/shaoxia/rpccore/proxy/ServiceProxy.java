@@ -80,9 +80,11 @@ public class ServiceProxy implements InvocationHandler {
 		RegistryConfig registryConfig = rpcConfig.getRegistryConfig();
 		// 获取注册中心 默认ETCD
 		Registry registry = RegistryFactory.getInstance(registryConfig.getRegistry());
+
 		ServiceMetaInfo serviceMetaInfo = new ServiceMetaInfo();
 		serviceMetaInfo.setServiceName(serviceName);
 		serviceMetaInfo.setServiceVersion(RpcConstant.DEFAULT_SERVICE_VERSION);
+		// 获取已经注册的服务信息
 		List<ServiceMetaInfo> serviceMetaInfos = registry.serviceDiscovery(serviceMetaInfo.getServiceKey());
 		System.out.println("服务列表为"+serviceMetaInfos);
 		if(CollUtil.isEmpty(serviceMetaInfos)){

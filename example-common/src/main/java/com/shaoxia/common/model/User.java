@@ -10,6 +10,7 @@ import java.util.Date;
  * @date 2024-06-23 19:03
  */
 
+
 public class User implements Serializable {
 	private String name;
 

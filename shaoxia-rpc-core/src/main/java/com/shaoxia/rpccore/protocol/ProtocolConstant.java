@@ -2,6 +2,7 @@ package com.shaoxia.rpccore.protocol;
 
 /**
  * 协议常量
+ * @author wjc28
  */
 public interface ProtocolConstant {
 	/**

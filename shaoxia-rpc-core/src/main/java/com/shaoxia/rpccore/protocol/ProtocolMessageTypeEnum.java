@@ -2,6 +2,10 @@ package com.shaoxia.rpccore.protocol;
 
 import lombok.Getter;
 
+/**
+ * @author wjc28
+ */
+
 @Getter
 public enum ProtocolMessageTypeEnum {
 	REQUEST(0),

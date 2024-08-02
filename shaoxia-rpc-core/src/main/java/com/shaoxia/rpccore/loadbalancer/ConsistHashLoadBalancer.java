@@ -37,6 +37,7 @@ public class ConsistHashLoadBalancer implements LoadBalancer{
 		}
 
 		int hash = getHash(requestParams);
+		// 找到第一个hash值大于当前哈希的对象
 		Map.Entry<Integer, ServiceMetaInfo> ceilingEntry = virtualNode.ceilingEntry(hash);
 		if (ceilingEntry == null){
 			ceilingEntry =  virtualNode.firstEntry();

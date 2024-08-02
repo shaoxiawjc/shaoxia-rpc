@@ -30,7 +30,7 @@ public class RpcApplication {
 		Registry registry = RegistryFactory.getInstance(registryConfig.getRegistry());
 		registry.init(registryConfig);
 		log.info("registry init,config = {}",registryConfig.toString());
-
+		// 程序关闭的时候停止
 		Runtime.getRuntime().addShutdownHook(new Thread(registry::destroy));
 	}
 

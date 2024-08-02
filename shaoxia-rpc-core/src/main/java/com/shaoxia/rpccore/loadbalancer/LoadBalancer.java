@@ -5,6 +5,9 @@ import com.shaoxia.rpccore.model.ServiceMetaInfo;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author wjc28
+ */
 public interface LoadBalancer {
 	/**
 	 * 选择服务器调用

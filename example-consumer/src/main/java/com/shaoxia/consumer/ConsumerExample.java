@@ -2,9 +2,7 @@ package com.shaoxia.consumer;
 
 import com.shaoxia.common.model.User;
 import com.shaoxia.common.service.UserService;
-import com.shaoxia.rpccore.RpcApplication;
 import com.shaoxia.rpccore.bootstrap.ConsumerBootstrap;
-import com.shaoxia.rpccore.config.RpcConfig;
 import com.shaoxia.rpccore.proxy.ServiceProxyFactory;
 
 import java.util.Objects;

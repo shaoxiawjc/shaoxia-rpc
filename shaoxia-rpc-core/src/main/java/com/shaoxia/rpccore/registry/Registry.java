@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * 注册中心
+ * @author wjc28
  */
 public interface Registry {
 	/**

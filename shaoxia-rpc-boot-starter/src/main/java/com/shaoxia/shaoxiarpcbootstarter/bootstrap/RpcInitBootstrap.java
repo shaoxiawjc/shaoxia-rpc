@@ -4,8 +4,6 @@ import com.shaoxia.rpccore.RpcApplication;
 import com.shaoxia.rpccore.config.RpcConfig;
 import com.shaoxia.rpccore.server.tcp.VertxTcpServer;
 import com.shaoxia.shaoxiarpcbootstarter.annotation.EnableSX;
-import com.shaoxia.shaoxiarpcbootstarter.annotation.SXReference;
-import io.vertx.core.Vertx;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;

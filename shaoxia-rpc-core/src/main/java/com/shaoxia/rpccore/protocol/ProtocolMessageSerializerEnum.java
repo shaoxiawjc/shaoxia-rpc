@@ -7,6 +7,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @author wjc28
+ */
+
 @Getter
 public enum ProtocolMessageSerializerEnum {
 	JDK(0,"jdk"),
