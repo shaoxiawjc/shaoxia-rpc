@@ -970,6 +970,8 @@ public class RpcConsumerBootstrap implements BeanPostProcessor {
 
 ## RPC框架调用时序图
 
+> 以下图片背景为透明，建议改为浅色主题查看
+
 ![IM聊天系统](./markdown-img/README.assets/IM聊天系统.png)
 
 
